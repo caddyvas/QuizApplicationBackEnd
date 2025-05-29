@@ -1,11 +1,16 @@
 package com.deepak.quizapplication.service;
 
 import com.deepak.quizapplication.dao.UsersDao;
+import com.deepak.quizapplication.exception.UserValidationException;
 import com.deepak.quizapplication.model.Users;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 
 // UserDetailsService is part of Spring boot Security framework which assists in User Login and Authentication TODO
@@ -28,12 +33,16 @@ public class UserService {
         return new ResponseEntity<>("SUCCESS: " + user.getUsername() + " has been successfully registered", HttpStatus.CREATED);
     }
 
-    public ResponseEntity<Users> login(String userName) {
-        Users user = usersDao.findByUsername(userName);
-        if (user != null) {
-            return new ResponseEntity<>(user, HttpStatus.OK);
+    public ResponseEntity<Object> login(String userName) throws UserValidationException {
+        Optional<Users> user = usersDao.findByUsername(userName);
+        //System.out.println("{\"name\" :" + "\"" + user.get().getName() + "\"" + "}");
+        if (user.isPresent()) {
+            Map<String, Object> mapResponse = new HashMap<>();
+            mapResponse.put("Response Successful", user);
+            return new ResponseEntity<>(mapResponse, HttpStatus.OK);
+        } else {
+            throw new UserValidationException("User does not exist " +userName);
         }
-        return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
 
     // TODO - next phase using security framework
