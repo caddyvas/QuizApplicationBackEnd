@@ -6,8 +6,12 @@ import com.deepak.quizapplication.model.Users;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -17,6 +21,12 @@ public class UserService {
 
     @Autowired
     private UsersDao usersDao;
+
+    @Autowired
+    AuthenticationManager authenticationManager;
+
+    @Autowired
+    private JWTService jwtService;
 
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(10);
 
@@ -46,6 +56,18 @@ public class UserService {
             return new ResponseEntity<>(mapResponse, HttpStatus.OK);
         } else {
             throw new UserValidationException("User does not exist " + userName);
+        }
+    }
+
+    public String verify(Users user) {
+        Authentication authentication =
+                authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
+
+        if (authentication.isAuthenticated()) {
+            // generate Token
+            return jwtService.generateToken(user.getUsername());
+        } else {
+            return "failed";
         }
     }
 }

@@ -5,6 +5,9 @@ import com.deepak.quizapplication.model.Users;
 import com.deepak.quizapplication.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,11 +26,16 @@ public class UsersController {
     @GetMapping("login/{username}")
     public ResponseEntity<Object> login(@PathVariable String username) {
         return userService.login(username);
-    } */
+    }
 
     //using @RequestParam - http://xxxxxxxxx/users/login?username=xxxx&password=xxxxx
     @GetMapping("login")
     public ResponseEntity<Object> login(@RequestParam String username, @RequestParam String password) throws UserValidationException {
         return userService.login(username);
+    } */
+
+    @PostMapping("login")
+    public String jwtLogin(@RequestBody Users user) {
+        return userService.verify(user);
     }
 }
